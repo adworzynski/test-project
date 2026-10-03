@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "keel": {
+      "type": "stdio",
+      "command": "keel",
+      "args": [
+        "mcp"
+      ]
+    }
+  }
+}

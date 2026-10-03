@@ -68,3 +68,22 @@ describe('instruction compiler (AE-1, AE-2)', () => {
     expect(twice).toBe(`intro\n\n${BEGIN}\nB\n${END}\noutro\n`);
   });
 });
+
+describe('init git hook', () => {
+  it('installs a commit-msg hook only when none exists', async () => {
+    const { git: g, tmpDir, write: w, read: r } = await import('./helpers.js');
+    const { initProject } = await import('../src/commands/init.js');
+    const root = tmpDir();
+    g(root, 'init', '-q');
+    w(root, 'pubspec.yaml', 'name: a\n');
+    const res = initProject(root, { ci: false });
+    expect(res.gitHook).toMatch(/commit-msg$/);
+    expect(r(root, '.git/hooks/commit-msg')).toContain('keel hook commit-msg');
+    const root2 = tmpDir();
+    g(root2, 'init', '-q');
+    w(root2, 'pubspec.yaml', 'name: a\n');
+    w(root2, '.git/hooks/commit-msg', '#!/bin/sh\necho mine\n');
+    expect(initProject(root2, { ci: false }).gitHook).toBeUndefined();
+    expect(r(root2, '.git/hooks/commit-msg')).toBe('#!/bin/sh\necho mine\n');
+  });
+});

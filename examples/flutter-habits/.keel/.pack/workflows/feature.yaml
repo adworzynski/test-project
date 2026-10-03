@@ -1,0 +1,31 @@
+# Feature track: new behavior in one area (journey J1 for later features).
+id: feature
+name: Feature track
+version: 0.1.0
+scope: change
+budget: feature
+description: New behavior in one component, with criteria, a short design and a task list.
+stages:
+  - id: define
+    name: Define
+    steps:
+      - id: define
+        name: Change note with criteria, design and tasks
+        skill: keel-change
+        produces: change
+        # Plan approval. Set `gate: none` to skip it for this profile.
+        gate: approval
+        explain: >-
+          Writes one change note: why, the spec delta (ADDED, MODIFIED and REMOVED requirements and
+          criteria), a short design and a task list, all under 300 lines. Approval locks the plan.
+  - id: build
+    name: Build
+    steps:
+      - id: implement
+        name: Tests first, then code
+        skill: keel-implement
+        produces: change
+        gate: evidence
+        explain: >-
+          Failing tests tagged with each criterion ID, then the code. `keel done` checks the
+          evidence, merges the delta into the living spec and archives the change.

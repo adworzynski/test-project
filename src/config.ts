@@ -120,7 +120,9 @@ export function defaultConfig(opts: { project: string; stack: Stack; profile?: P
     sensitive: {
       paths: [
         '**/auth/**',
-        '**/*auth*.*',
+        '**/auth_*',
+        '**/*_auth.*',
+        '**/Auth*.*',
         '**/login/**',
         '**/payment*/**',
         '**/*payment*.*',

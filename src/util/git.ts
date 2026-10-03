@@ -50,13 +50,13 @@ export function resolveBase(root: string, explicit?: string): string | undefined
   return undefined;
 }
 
-/** Files changed between base and the working tree (committed, staged and unstaged, plus untracked). */
+/** Files changed between base and the working tree (committed, staged and unstaged, plus untracked), relative to `root`. */
 export function changedFiles(root: string, base?: string): string[] {
   const files = new Set<string>();
   if (base) {
-    for (const f of git(root, ['diff', '--name-only', base]).stdout.split('\n')) if (f.trim()) files.add(f.trim());
+    for (const f of git(root, ['diff', '--name-only', '--relative', base]).stdout.split('\n')) if (f.trim()) files.add(f.trim());
   } else {
-    for (const f of git(root, ['diff', '--name-only', 'HEAD']).stdout.split('\n')) if (f.trim()) files.add(f.trim());
+    for (const f of git(root, ['diff', '--name-only', '--relative', 'HEAD']).stdout.split('\n')) if (f.trim()) files.add(f.trim());
   }
   for (const f of git(root, ['ls-files', '--others', '--exclude-standard']).stdout.split('\n'))
     if (f.trim()) files.add(f.trim());
@@ -66,7 +66,7 @@ export function changedFiles(root: string, base?: string): string[] {
 /** Lines added+removed per file between base (or HEAD) and the working tree. */
 export function diffStat(root: string, base?: string): Map<string, number> {
   const out = new Map<string, number>();
-  const r = git(root, ['diff', '--numstat', base ?? 'HEAD']);
+  const r = git(root, ['diff', '--numstat', '--relative', base ?? 'HEAD']);
   for (const line of r.stdout.split('\n')) {
     const m = line.match(/^(\d+|-)\t(\d+|-)\t(.+)$/);
     if (m) out.set(m[3]!, (Number(m[1]) || 0) + (Number(m[2]) || 0));
@@ -75,7 +75,7 @@ export function diffStat(root: string, base?: string): Map<string, number> {
 }
 
 export function showFile(root: string, rev: string, file: string): string | undefined {
-  const r = git(root, ['show', `${rev}:${file}`]);
+  const r = git(root, ['show', `${rev}:./${file}`]);
   return r.ok ? r.stdout : undefined;
 }
 
@@ -95,7 +95,7 @@ const MARK = '@@keel-commit@@';
 export function commitsWithRefs(root: string, opts: { withFiles?: boolean; range?: string } = {}): Commit[] {
   const fmt = MARK + ['%H', '%s', '%an', '%aI', '%(trailers:key=Keel-Ref,valueonly,separator=%x2C)'].join(SEP);
   const args = ['log', `--format=${fmt}`];
-  if (opts.withFiles) args.push('--name-only');
+  if (opts.withFiles) args.push('--name-only', '--relative');
   if (opts.range) args.push(opts.range);
   const r = git(root, args);
   if (!r.ok) return [];

@@ -1,0 +1,7 @@
+id: BR-001
+decisions:
+  - decision: approved
+    by: adam
+    hash: sha256:0d42768b73378fa4
+    items: {}
+    at: 2026-10-03T09:00:00Z

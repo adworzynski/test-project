@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Habits",
+    "slug": "habits",
+    "version": "0.1.0",
+    "ios": {
+      "buildNumber": "1"
+    },
+    "android": {
+      "versionCode": 1
+    }
+  }
+}

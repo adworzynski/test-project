@@ -1,0 +1,89 @@
+# Product track: a new app from idea to a store-ready build (journey J1).
+# Edit freely: add, remove or reorder steps. `keel check` validates this file (WF-1).
+id: product
+name: Product track
+version: 0.1.0
+scope: project
+budget: feature
+description: Take a new app from idea to a store-ready build.
+stages:
+  - id: discovery
+    name: Discovery
+    steps:
+      - id: brief
+        name: One-page brief
+        skill: keel-discovery
+        produces: brief
+        gate: approval
+        explain: >-
+          A short interview turns the idea into a one-page brief: problem, users, jobs to be done,
+          success metrics, constraints and assumptions. Every later artifact traces back to it.
+          Good output fits on one page (about 60 lines) and has success metrics you can measure.
+  - id: planning
+    name: Planning
+    steps:
+      - id: prd
+        name: Lean PRD
+        skill: keel-prd
+        inputs: [brief]
+        produces: prd
+        gate: approval
+        explain: >-
+          Turns the brief into numbered requirements (FR for behavior, NFR for qualities) with a
+          MoSCoW priority each. Requirements are product intent, not technical design. Good output
+          has short, testable requirements and a clear MVP cut; every FR later gets at least one story.
+      - id: screens
+        name: Screen map and design tokens
+        skill: keel-screens
+        inputs: [prd]
+        produces: [screen-map, design-tokens]
+        gate: approval
+        explain: >-
+          Lists the screens (SC-…) with their purpose, key elements and states (empty, loading,
+          error, offline, permission), the flows between them, and a small design-token set.
+          Stories that change UI link the screens they touch.
+      - id: architecture
+        name: Stack decisions (ADRs)
+        skill: keel-architecture
+        inputs: [prd]
+        produces: adr
+        gate: approval
+        done_when: [accepted, rejected, deprecated, superseded]
+        explain: >-
+          Records the stack choices that are expensive to change later (state management, storage,
+          backend, navigation) as short MADR decision records. They must be accepted before the
+          first story starts so agents follow them instead of improvising.
+      - id: stories
+        name: Stories with acceptance criteria
+        skill: keel-stories
+        inputs: [prd, screen-map, adr]
+        produces: story
+        gate: approval
+        explain: >-
+          Splits the PRD into small stories, each implementing one or more FRs and carrying 1–7
+          Given/When/Then criteria with their own IDs (AC-…). Criteria are what tests will prove.
+  - id: build
+    name: Build
+    steps:
+      - id: implement
+        name: Implement stories test-first
+        skill: keel-implement
+        produces: story
+        foreach: true
+        gate: evidence
+        explain: >-
+          For each story: start it, get its context pack, write failing tests tagged with the
+          criterion IDs, then the code. `keel done` only succeeds when every criterion has a
+          linked passing test (or a human waiver).
+  - id: release
+    name: Release
+    steps:
+      - id: release
+        name: Release checklist and human submit
+        skill: keel-release
+        produces: release
+        gate: checklist
+        explain: >-
+          Generates the store checklist from the PRD and screens: version and build numbers,
+          signing, metadata, screenshots per device size, privacy labels or data-safety form,
+          review notes and the submit step, which a human always does.

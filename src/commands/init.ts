@@ -10,6 +10,8 @@ import { Project } from '../project.js';
 import { KeelError } from '../util/errors.js';
 import { currentUser } from '../util/user.js';
 import { ACTION_REF } from '../constants.js';
+import { installGitHook } from './githook.js';
+import { isGitRepo } from '../util/git.js';
 import YAML from 'yaml';
 import { nowIso } from '../util/text.js';
 
@@ -148,6 +150,8 @@ export interface InitOptions {
   project?: string;
   force?: boolean;
   ci?: boolean;
+  /** Install the commit-msg hook that adds Keel-Ref (default: when the repo has no commit-msg hook). */
+  gitHook?: boolean;
 }
 
 export interface InitResult {
@@ -156,6 +160,7 @@ export interface InitResult {
   detected: { stack?: Stack; agents: AgentId[] };
   created: string[];
   compile: CompileResult;
+  gitHook?: string;
 }
 
 /** `keel init` (J1 step 1): detect the stack and agents, write .keel/ and the agent files. */
@@ -201,5 +206,15 @@ export function initProject(root: string, opts: InitOptions = {}): InitResult {
     }
   }
   const compile = compileAgents(project, agents);
-  return { root, config, detected: { stack: detectedStack, agents: detectedAgents }, created, compile };
+  // Agents don't always follow the trailer instruction (their own commit conventions can win), so a
+  // local commit-msg hook adds Keel-Ref as the fallback (F5). Never replaces an existing hook.
+  let gitHook: string | undefined;
+  if (opts.gitHook !== false && isGitRepo(root)) {
+    try {
+      gitHook = installGitHook(project);
+    } catch {
+      gitHook = undefined;
+    }
+  }
+  return { root, config, detected: { stack: detectedStack, agents: detectedAgents }, created, compile, gitHook };
 }

@@ -1,0 +1,82 @@
+# Keel project configuration. Docs: `keel explain config`.
+# Budgets are line caps per artifact (WF-6); sensitive paths escalate Quick changes (WF-4).
+version: 1
+project: habits-expo
+profile: solo-mobile
+stack: expo
+agents:
+  - claude
+  - copilot
+owner: adam
+budgets:
+  lines:
+    brief: 60
+    quick: 60
+    feature: 300
+    prd: 300
+    story: 80
+    adr: 60
+    screens: 150
+    tokens: 80
+  context_tokens: 20000
+  cost_warn_usd: 2
+sensitive:
+  paths:
+    - "**/auth/**"
+    - "**/auth_*"
+    - "**/*_auth.*"
+    - "**/Auth*.*"
+    - "**/login/**"
+    - "**/payment*/**"
+    - "**/*payment*.*"
+    - "**/billing/**"
+    - "**/purchase*/**"
+    - "**/migrations/**"
+    - "**/schema/**"
+    - "**/*schema*.*"
+    - "**/*.sql"
+  keywords:
+    - auth
+    - login
+    - password
+    - payment
+    - billing
+    - purchase
+    - subscription
+    - schema
+    - migration
+    - encryption
+    - token
+router:
+  quick_max_files: 3
+  quick_max_lines: 80
+planning:
+  require_screens: true
+  require_stack_adrs: true
+verify:
+  tests:
+    - "**/*.test.{ts,tsx,js,jsx}"
+    - "**/__tests__/**/*.{ts,tsx,js,jsx}"
+  results:
+    - .keel/tmp/jest-results.json
+    - reports/**/*.xml
+  run: npx jest --ci --json --outputFile=.keel/tmp/jest-results.json
+  require: done
+  drift: advisory
+  dependencies:
+    policy: blocking
+    min_age_days: 30
+    allow: []
+    manifests:
+      - package.json
+release:
+  kind: mobile
+mcp:
+  command: keel
+  args:
+    - mcp
+pricing: {}
+pack:
+  name: core
+  version: 0.1.0
+initialized: 2026-10-03T09:00:00Z

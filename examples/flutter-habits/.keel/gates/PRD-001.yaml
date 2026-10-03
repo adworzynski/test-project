@@ -1,0 +1,13 @@
+id: PRD-001
+decisions:
+  - decision: approved
+    by: adam
+    hash: sha256:98950a0bfc96da56
+    items:
+      FR-001: sha256:f230b6cc43962608
+      FR-002: sha256:6413d892e401100b
+      FR-003: sha256:89ebac9f1d743730
+      FR-004: sha256:dd19ea95744dad5d
+      NFR-001: sha256:6c9eeec5481fe01b
+      NFR-002: sha256:894ac65c1361760a
+    at: 2026-10-03T09:00:00Z

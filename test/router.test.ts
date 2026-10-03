@@ -33,3 +33,16 @@ describe('router (WF-3, WF-4)', () => {
     expect(d.reasons.join(' ')).toMatch(/not enough signal/);
   });
 });
+
+describe('router weighting', () => {
+  it('unrelated uncommitted files do not turn new behavior into a Quick change', () => {
+    const d = route({ description: 'Add a weekly summary screen', paths: ['specs/a.md', 'specs/b.md'], inferredPaths: true }, cfg);
+    expect(d.track).toBe('feature');
+    expect(d.reasons.join(' ')).toMatch(/in uncommitted changes/);
+  });
+  it('balanced signals choose Feature and say so', () => {
+    const d = route({ description: 'Fix export', paths: [] }, cfg);
+    expect(d.track).toBe('feature');
+    expect(d.reasons.join(' ')).toMatch(/balanced/);
+  });
+});

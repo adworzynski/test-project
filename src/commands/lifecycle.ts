@@ -70,11 +70,15 @@ export function newChange(
   if (!description.trim()) throw new KeelError('Describe the change, e.g. keel new "Fix crash when a habit name has an emoji".');
   let paths = opts.paths ?? [];
   let lines: Map<string, number> | undefined;
+  let inferredPaths = false;
   if (!paths.length && isGitRepo(project.root)) {
     paths = changedFiles(project.root).filter((f) => !f.startsWith('.keel/'));
-    if (paths.length) lines = diffStat(project.root);
+    if (paths.length) {
+      lines = diffStat(project.root);
+      inferredPaths = true;
+    }
   }
-  const decision = route({ description, paths, lines }, project.config);
+  const decision = route({ description, paths, lines, inferredPaths }, project.config);
   let track = decision.track;
   let overridden = false;
   if (opts.track && opts.track !== track) {
@@ -206,6 +210,16 @@ export function waive(project: Project, id: string, reason: string, opts: { revo
   return { id: c.id, by };
 }
 
+/** Pre-run estimate for a work item's build step, from past runs in the ledger (RC-4). */
+export function costEstimate(project: Project, id: string): { step: string; usd: number; over: boolean } | undefined {
+  const n = project.graph.get(id.toUpperCase());
+  if (!n) return undefined;
+  const step = n.type === 'change' ? changeTrack(project, n)?.steps.find((s) => s.step.gate === 'evidence')?.step.id : 'implement';
+  const usd = step ? estimateStepCost(project, step) : undefined;
+  if (!step || usd === undefined) return undefined;
+  return { step, usd, over: usd > project.config.budgets.cost_warn_usd };
+}
+
 export interface StartResult {
   id: string;
   warnings: string[];
@@ -233,12 +247,11 @@ export function start(project: Project, id: string, opts: { force?: boolean } = 
   }
   if (problems.length && !opts.force) throw new KeelError(`Can't start ${n.id}:`, 1, [...problems, 'Use --force to start anyway.']);
   if (problems.length) warnings.push(...problems.map((p) => `forced: ${p}`));
-  const step = n.type === 'change' ? changeTrack(project, n)?.steps.find((s) => s.step.gate === 'evidence')?.step.id : 'implement';
-  const costEstimate = step ? estimateStepCost(project, step) : undefined;
-  if (costEstimate !== undefined && costEstimate > project.config.budgets.cost_warn_usd)
-    warnings.push(`Past runs of the ${step} step averaged $${costEstimate.toFixed(2)}, above your $${project.config.budgets.cost_warn_usd} warning threshold.`);
+  const est = costEstimate(project, n.id);
+  const costEstimateUsd = est?.usd;
+  if (est?.over) warnings.push(`Past runs of the ${est.step} step averaged $${est.usd.toFixed(2)}, above your $${project.config.budgets.cost_warn_usd} warning threshold.`);
   setStatus(project, n.id, 'in-progress', { started: nowIso() });
-  return { id: n.id, warnings, costEstimate };
+  return { id: n.id, warnings, costEstimate: costEstimateUsd };
 }
 
 export interface DoneResult {

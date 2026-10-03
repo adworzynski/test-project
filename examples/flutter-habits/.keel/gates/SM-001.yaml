@@ -1,0 +1,9 @@
+id: SM-001
+decisions:
+  - decision: approved
+    by: adam
+    hash: sha256:ef69a34a90014a83
+    items:
+      SC-001: sha256:18777f9e35d2fb08
+      SC-002: sha256:a85eef1249128eea
+    at: 2026-10-03T09:00:00Z

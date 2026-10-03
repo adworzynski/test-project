@@ -8,11 +8,11 @@ import { projectTrack } from '../workflow/engine.js';
 import { computeCoverage } from '../verify/coverage.js';
 import { renderStatus, renderNext, renderDiagnostics } from './render.js';
 import { checkProject } from './check.js';
-import { addArtifact, newChange, rerouteChange, review, approve, reject, waive, start, done, refine } from './lifecycle.js';
+import { addArtifact, newChange, rerouteChange, review, approve, reject, waive, start, done, refine, costEstimate } from './lifecycle.js';
 import { compileAgents } from '../agents/compile.js';
 import { c } from '../util/output.js';
 import { KeelError } from '../util/errors.js';
-import { interactive, ask } from '../util/prompt.js';
+import { interactive, ask, confirm } from '../util/prompt.js';
 import { detectStack } from './init.js';
 import { generateSpec } from '../spec/living.js';
 
@@ -72,6 +72,7 @@ function registerCoreCommands(program: Command, ctx: Ctx) {
     .option('--agents <list>', `comma-separated agents (${ALL_AGENTS.join(', ')})`)
     .option('--name <name>', 'project name')
     .option('--no-ci', 'do not write .github/workflows/keel.yml')
+    .option('--no-git-hook', 'do not install the commit-msg hook that adds Keel-Ref trailers')
     .option('--force', 'rewrite keel.yaml if it exists')
     .option('--json', 'machine-readable output')
     .action(async (o) => {
@@ -84,11 +85,12 @@ function registerCoreCommands(program: Command, ctx: Ctx) {
       }
       const agents = o.agents ? (String(o.agents).split(',').map((s) => s.trim()) as AgentId[]) : undefined;
       for (const a of agents ?? []) if (!ALL_AGENTS.includes(a)) throw new KeelError(`Unknown agent ${a}; use ${ALL_AGENTS.join(', ')}`);
-      const r = initProject(root, { stack, profile: o.profile as Profile | undefined, agents, project: o.name, force: o.force, ci: o.ci });
+      const r = initProject(root, { stack, profile: o.profile as Profile | undefined, agents, project: o.name, force: o.force, ci: o.ci, gitHook: o.gitHook });
       if (o.json) return json(r);
       console.log(`${c.green('Initialized')} Keel for ${c.bold(r.config.project)}: ${r.config.profile} profile, ${r.config.stack} stack${r.detected.stack ? ' (detected)' : ''}.`);
       console.log(`Agents: ${r.config.agents.join(', ')}${r.detected.agents.length ? ' (detected)' : ' (none detected, so all four)'}.`);
       console.log(`Wrote .keel/ and ${r.compile.written.length} agent files (AGENTS.md, skills, MCP config, hooks).`);
+      if (r.gitHook) console.log(`Installed a commit-msg hook that adds Keel-Ref for the item in progress (${r.gitHook.split(/[\\/]/).slice(-3).join('/')}).`);
       for (const w of r.compile.warnings) console.log(`${c.yellow('warning')} ${w}`);
       const p = ctx.openProject();
       console.log('\n' + c.bold('Next'));
@@ -219,9 +221,16 @@ function registerCoreCommands(program: Command, ctx: Ctx) {
     .command('start <id>')
     .description('Start a story or change (checks its gates first)')
     .option('--force', 'start despite open gates')
+    .option('-y, --yes', 'skip the cost confirmation')
     .option('--json', 'machine-readable output')
-    .action((id, o) => {
-      const r = start(ctx.openProject(), id, { force: o.force });
+    .action(async (id, o) => {
+      const p = ctx.openProject();
+      const est = costEstimate(p, id);
+      if (est?.over && !o.yes && interactive()) {
+        const ok = await confirm(`Past runs of the ${est.step} step averaged $${est.usd.toFixed(2)} (threshold $${p.config.budgets.cost_warn_usd}). Start ${id.toUpperCase()}?`, true);
+        if (!ok) return;
+      }
+      const r = start(p, id, { force: o.force });
       if (o.json) return json(r);
       for (const w of r.warnings) console.log(`${c.yellow('warning')} ${w}`);
       console.log(`${c.green('Started')} ${r.id}. Get its context pack with: keel context ${r.id}`);

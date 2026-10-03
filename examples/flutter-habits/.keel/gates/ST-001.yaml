@@ -1,0 +1,9 @@
+id: ST-001
+decisions:
+  - decision: approved
+    by: adam
+    hash: sha256:8974c040f0781122
+    items:
+      AC-001: sha256:4c64c1e8cb3ac018
+      AC-002: sha256:b57f6129ace8c9ef
+    at: 2026-10-03T09:00:00Z

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
+import { createRequire } from 'node:module';
 import { upgradePack } from '../src/commands/upgrade.js';
 import { PACK_DIR } from '../src/paths.js';
 import { claudeTranscriptUsage, claudeStopHook, claudeSessionHook, costReport } from '../src/commands/cost.js';
@@ -17,6 +18,8 @@ import { start, done, waive, newChange } from '../src/commands/lifecycle.js';
 import { explain } from '../src/commands/explain.js';
 import { newProject, tmpDir, write, read, git } from './helpers.js';
 import { planHabits } from './plan.js';
+import { changedFiles as changedFilesRel } from '../src/util/git.js';
+import { newDependencies } from '../src/verify/deps.js';
 
 describe('keel upgrade (WF-7)', () => {
   it('replaces untouched files, merges edited ones, and reports conflicts', () => {
@@ -93,8 +96,17 @@ describe('cost ledger (RC-3, RC-4)', () => {
   });
 });
 
+const hasSqlite = (() => {
+  try {
+    createRequire(import.meta.url)('node:sqlite');
+    return true;
+  } catch {
+    return false;
+  }
+})();
+
 describe('derived SQLite index (AG-6)', () => {
-  it('rebuilds identically after deletion', async () => {
+  it.skipIf(!hasSqlite)('rebuilds identically after deletion', async () => {
     const p = newProject();
     planHabits(p);
     write(p.root, 'test/habit_test.dart', "void main() {\n  // @keel AC-001\n  test('saved habit is listed', () {});\n}\n");
@@ -180,5 +192,38 @@ describe('stats and explain (WF-6, NV-5)', () => {
       expect(explain(p, step)).toMatch(/›/);
     expect(explain(p, 'gates')).toMatch(/evidence/);
     expect(explain(p)).toMatch(/Quick track/);
+  });
+});
+
+describe('project in a subfolder of a git repo', () => {
+  it('reports paths relative to the project, not the repo root', () => {
+    const repo = tmpDir();
+    git(repo, 'init', '-q', '-b', 'main');
+    const p = (() => {
+      const sub = path.join(repo, 'apps', 'habits');
+      fs.mkdirSync(sub, { recursive: true });
+      return sub;
+    })();
+    write(p, 'pubspec.yaml', 'name: habits\ndependencies:\n  riverpod: ^2.0.0\n');
+    git(repo, 'add', '-A');
+    git(repo, 'commit', '-qm', 'base');
+    write(p, 'pubspec.yaml', 'name: habits\ndependencies:\n  riverpod: ^2.0.0\n  made_up_pkg: ^1.0.0\n');
+    write(p, 'lib/auth/x.dart', '//');
+    expect(changedFilesRel(p)).toEqual(['lib/auth/x.dart', 'pubspec.yaml']);
+    expect(newDependencies(p, ['pubspec.yaml'], 'HEAD').map((d) => d.name)).toEqual(['made_up_pkg']);
+  });
+});
+
+describe('cost warning before a step (RC-4)', () => {
+  it('estimates from past runs of the same step and warns above the threshold', async () => {
+    const { appendLedger } = await import('../src/ledger/ledger.js');
+    const { costEstimate } = await import('../src/commands/lifecycle.js');
+    const p = newProject();
+    planHabits(p);
+    expect(costEstimate(p, 'ST-001')).toBeUndefined();
+    appendLedger(p, { kind: 'cost', step: 'implement', cost_usd: 3, ref: 'ST-000' });
+    appendLedger(p, { kind: 'cost', step: 'implement', cost_usd: 5, ref: 'ST-000' });
+    expect(costEstimate(p, 'ST-001')).toEqual({ step: 'implement', usd: 4, over: true });
+    expect(start(p, 'ST-001').warnings.join(' ')).toMatch(/averaged \$4\.00, above your \$2 warning threshold/);
   });
 });

@@ -226,3 +226,28 @@ describe('WF-1: workflows are data', () => {
     expect(ds.some((d) => d.code === 'workflow-schema' && d.file === '.keel/workflows/product.yaml')).toBe(true);
   });
 });
+
+describe('WF-2: the same tracks on an Expo app with Jest reports', () => {
+  it('Product track story and a Quick fix end to end', async () => {
+    const p = newProject('expo');
+    expect(p.config).toMatchObject({ stack: 'expo', profile: 'solo-mobile' });
+    planHabits(p);
+    start(p, 'ST-001');
+    write(p.root, 'src/__tests__/habits.test.ts', "describe('habits', () => {\n  // @keel AC-001\n  it('saved habit is listed', () => {});\n});\n");
+    const jest = (status: string) =>
+      JSON.stringify({ testResults: [{ name: `${p.root}/src/__tests__/habits.test.ts`, assertionResults: [{ ancestorTitles: ['habits'], fullName: 'habits saved habit is listed', title: 'saved habit is listed', status }] }] });
+    write(p.root, '.keel/tmp/jest-results.json', jest('passed'));
+    const v = await verify(p, { record: true, deps: false });
+    expect(v.results.files).toEqual(['.keel/tmp/jest-results.json']);
+    expect(done(p, 'ST-001').status).toBe('done');
+    const ch = newChange(p.reload(), 'Fix wrong habit count label', { paths: ['src/HabitCount.tsx'] });
+    expect(ch.decision.track).toBe('quick');
+    edit(p, ch.file, /#### AC-\d+: The bug no longer happens\n- Given …\n- When …\n- Then …/, '#### AC-003: Count label is plural-aware\n- Given one habit\n- When the list renders\n- Then the label reads "1 habit"');
+    start(p, ch.id);
+    write(p.root, 'src/__tests__/count.test.ts', "// @keel AC-003\ntest('label is plural-aware', () => {});\n");
+    write(p.root, '.keel/tmp/jest-results.json', JSON.stringify({ testResults: [{ name: `${p.root}/src/__tests__/count.test.ts`, assertionResults: [{ ancestorTitles: [], fullName: 'label is plural-aware', title: 'label is plural-aware', status: 'passed' }] }] }));
+    await verify(p, { record: true, deps: false });
+    expect(done(p.reload(), ch.id).status).toBe('archived');
+    expect(computeCoverage(p.reload()).byId.get('AC-001')!.status).toBe('passed');
+  });
+});
