@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "keel://schemas/decision.json",
+  "title": "Decision log entry in .keel/memory/decisions.md (ME-1)",
+  "type": "object",
+  "required": [
+    "id",
+    "title"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^D-\\d{3,}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "date": {
+      "type": "string"
+    },
+    "by": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "step": {
+      "type": "string"
+    },
+    "link": {
+      "type": "string"
+    }
+  }
+}

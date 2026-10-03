@@ -1,0 +1,84 @@
+name: Keel verify
+description: >-
+  Checks that every acceptance criterion of finished work has a passing linked test, flags spec drift
+  and blocks hallucinated or brand-new dependencies; posts a summary on the pull request (Keel VG-4).
+branding:
+  icon: anchor
+  color: blue
+inputs:
+  results:
+    description: Test report files or globs (JUnit XML, flutter --machine JSON, Jest JSON), separated by spaces or newlines. Defaults to verify.results in .keel/keel.yaml.
+    required: false
+    default: ''
+  base:
+    description: Git ref to diff against. Defaults to the pull request base.
+    required: false
+    default: ''
+  comment:
+    description: Post or update one summary comment on the pull request.
+    required: false
+    default: 'true'
+  working-directory:
+    description: Folder that holds .keel/.
+    required: false
+    default: '.'
+  github-token:
+    description: Token used to comment on the pull request.
+    required: false
+    default: ${{ github.token }}
+outputs:
+  passed:
+    description: '"true" when every check passed.'
+    value: ${{ steps.verify.outputs.passed }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22
+    - name: Build Keel
+      shell: bash
+      working-directory: ${{ github.action_path }}/..
+      run: |
+        npm ci --no-audit --no-fund --legacy-peer-deps
+        npm run build
+    - name: keel verify
+      id: verify
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        KEEL_RESULTS: ${{ inputs.results }}
+        KEEL_BASE: ${{ inputs.base }}
+        KEEL_CLI: ${{ github.action_path }}/../dist/cli.js
+      run: |
+        set +e
+        args=(verify --ci --format markdown --out "$RUNNER_TEMP/keel-verify.md")
+        for r in $KEEL_RESULTS; do args+=(--results "$r"); done
+        if [ -n "$KEEL_BASE" ]; then args+=(--base "$KEEL_BASE"); fi
+        node "$KEEL_CLI" "${args[@]}"
+        code=$?
+        if [ -f "$RUNNER_TEMP/keel-verify.md" ]; then cat "$RUNNER_TEMP/keel-verify.md" >> "$GITHUB_STEP_SUMMARY"; fi
+        if [ "$code" = "0" ]; then echo "passed=true" >> "$GITHUB_OUTPUT"; else echo "passed=false" >> "$GITHUB_OUTPUT"; fi
+        echo "code=$code" >> "$GITHUB_OUTPUT"
+    - name: Comment on the pull request
+      if: inputs.comment == 'true' && github.event_name == 'pull_request'
+      continue-on-error: true
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const fs = require('fs');
+          const file = `${process.env.RUNNER_TEMP}/keel-verify.md`;
+          if (!fs.existsSync(file)) return;
+          const body = fs.readFileSync(file, 'utf8');
+          const { owner, repo } = context.repo;
+          const issue_number = context.payload.pull_request.number;
+          const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
+          const mine = comments.find((c) => c.body && c.body.includes('<!-- keel-verify -->'));
+          if (mine) await github.rest.issues.updateComment({ owner, repo, comment_id: mine.id, body });
+          else await github.rest.issues.createComment({ owner, repo, issue_number, body });
+    - name: Result
+      shell: bash
+      env:
+        CODE: ${{ steps.verify.outputs.code }}
+      run: exit "${CODE:-1}"

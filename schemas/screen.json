@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "keel://schemas/screen.json",
+  "title": "Screen section (### SC-001: title)",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "parent"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^SC-\\d{3,}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "parent": {
+      "type": "string"
+    }
+  }
+}

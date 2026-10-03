@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "keel://schemas/prd.json",
+  "title": "Lean PRD holding FR/NFR requirement sections (DP-2)",
+  "allOf": [
+    {
+      "$ref": "artifact.json"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "prd"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^PRD-\\d{3,}$"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "pending-review",
+        "approved",
+        "rejected",
+        "in-progress",
+        "done",
+        "archived"
+      ]
+    }
+  }
+}

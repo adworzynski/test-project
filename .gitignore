@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+# Keel derived files inside this repo's own examples
+.keel/index.sqlite
+.keel/tmp/

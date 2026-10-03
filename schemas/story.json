@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "keel://schemas/story.json",
+  "title": "User story with Given/When/Then criteria (DP-5)",
+  "allOf": [
+    {
+      "$ref": "artifact.json"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "story"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^ST-\\d{3,}$"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "pending-review",
+        "approved",
+        "rejected",
+        "in-progress",
+        "done",
+        "archived"
+      ]
+    },
+    "criteria": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^AC-\\d{3,}$"
+      }
+    },
+    "ui": {
+      "type": "boolean"
+    },
+    "epic": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "string"
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "keel://schemas/task.json",
+  "title": "Task checkbox (- [ ] TK-001: text)",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "parent"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^TK-\\d{3,}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "parent": {
+      "type": "string"
+    },
+    "checked": {
+      "type": "boolean"
+    }
+  }
+}

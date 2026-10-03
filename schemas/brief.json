@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "keel://schemas/brief.json",
+  "title": "One-page product brief (DP-1)",
+  "allOf": [
+    {
+      "$ref": "artifact.json"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "brief"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^BR-\\d{3,}$"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "pending-review",
+        "approved",
+        "rejected",
+        "in-progress",
+        "done",
+        "archived"
+      ]
+    }
+  }
+}

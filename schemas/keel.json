@@ -1,0 +1,234 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "keel://schemas/keel.json",
+  "title": "Keel project configuration (.keel/keel.yaml)",
+  "type": "object",
+  "required": [
+    "version",
+    "project",
+    "profile",
+    "stack"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profile": {
+      "enum": [
+        "solo-mobile",
+        "solo-web"
+      ]
+    },
+    "stack": {
+      "enum": [
+        "flutter",
+        "expo",
+        "swiftui",
+        "compose",
+        "web"
+      ]
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "claude",
+          "copilot",
+          "cursor",
+          "codex"
+        ]
+      }
+    },
+    "owner": {
+      "type": "string"
+    },
+    "budgets": {
+      "type": "object",
+      "properties": {
+        "lines": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "context_tokens": {
+          "type": "integer",
+          "minimum": 1000
+        },
+        "cost_warn_usd": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "sensitive": {
+      "type": "object",
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "router": {
+      "type": "object",
+      "properties": {
+        "quick_max_files": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "quick_max_lines": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "planning": {
+      "type": "object",
+      "properties": {
+        "require_screens": {
+          "type": "boolean"
+        },
+        "require_stack_adrs": {
+          "type": "boolean"
+        }
+      }
+    },
+    "verify": {
+      "type": "object",
+      "properties": {
+        "tests": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "run": {
+          "type": "string"
+        },
+        "require": {
+          "enum": [
+            "done",
+            "all"
+          ]
+        },
+        "drift": {
+          "enum": [
+            "advisory",
+            "blocking"
+          ]
+        },
+        "dependencies": {
+          "type": "object",
+          "properties": {
+            "policy": {
+              "enum": [
+                "blocking",
+                "advisory",
+                "off"
+              ]
+            },
+            "min_age_days": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "allow": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "manifests": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "release": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "mobile",
+            "web"
+          ]
+        }
+      }
+    },
+    "mcp": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "pricing": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "input",
+          "output"
+        ],
+        "properties": {
+          "input": {
+            "type": "number"
+          },
+          "output": {
+            "type": "number"
+          },
+          "cache_read": {
+            "type": "number"
+          },
+          "cache_write": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "initialized": {
+      "type": "string"
+    },
+    "pack": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

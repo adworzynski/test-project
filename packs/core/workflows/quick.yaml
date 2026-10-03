@@ -1,0 +1,31 @@
+# Quick track: bug fixes and small copy or style changes (journey J2).
+id: quick
+name: Quick track
+version: 0.1.0
+scope: change
+budget: quick
+description: A bug fix or small change. Two-section change note, reproduction test, fix.
+stages:
+  - id: note
+    name: Note
+    steps:
+      - id: note
+        name: Two-section change note
+        skill: keel-change
+        produces: change
+        gate: none
+        explain: >-
+          States why (the bug and how to reproduce it, plus the affected requirement) and the delta,
+          usually one ADDED criterion that the bug breaks. At most about 60 lines.
+  - id: fix
+    name: Fix
+    steps:
+      - id: fix
+        name: Reproduction test, then the fix
+        skill: keel-implement
+        produces: change
+        gate: evidence
+        explain: >-
+          Write a test that reproduces the bug and fails, tag it with the criterion ID, fix the code,
+          run `keel verify --run --record`, then `keel done`. If the fix touches a sensitive path
+          (auth, payments, schema), Keel moves the change to the Feature track.

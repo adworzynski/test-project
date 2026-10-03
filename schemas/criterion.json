@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "keel://schemas/criterion.json",
+  "title": "Acceptance criterion section (### AC-001: title, then Given/When/Then lines)",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "parent",
+    "when",
+    "then"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^AC-\\d{3,}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "parent": {
+      "type": "string"
+    },
+    "given": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "when": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "then": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

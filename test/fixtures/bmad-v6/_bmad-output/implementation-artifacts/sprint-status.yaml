@@ -1,0 +1,9 @@
+generated: 2026-09-20
+project: pantry-pal
+development_status:
+  epic-1: in-progress
+  1-1-add-an-item: done
+  1-2-scan-a-barcode: in-progress
+  epic-1-retrospective: optional
+  epic-2: backlog
+  2-1-expiry-reminders: backlog

@@ -1,0 +1,57 @@
+{
+  "name": "keel-cli",
+  "version": "0.1.0",
+  "description": "Keel: one traceable artifact graph from idea to release, driving any coding agent (Claude Code, Copilot, Cursor, Codex).",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "keel": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "packs",
+    "schemas",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/postbuild.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && vitest run",
+    "test:watch": "vitest",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "agents",
+    "spec-driven-development",
+    "mcp",
+    "claude-code",
+    "copilot",
+    "cursor",
+    "codex",
+    "traceability"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.0",
+    "ajv": "^8.20.0",
+    "commander": "^14.0.3",
+    "fast-xml-parser": "^5.11.2",
+    "picomatch": "^4.0.7",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/picomatch": "^4.0.3",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adworzynski/test-project.git"
+  }
+}

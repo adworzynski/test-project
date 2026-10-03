@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "keel://schemas/source.json",
+  "title": "Imported source document quoted for planning (DP-6)",
+  "allOf": [
+    {
+      "$ref": "artifact.json"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "source"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^SRC-\\d{3,}$"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "approved",
+        "archived"
+      ]
+    }
+  }
+}

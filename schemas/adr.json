@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "keel://schemas/adr.json",
+  "title": "Architecture decision record, MADR (DP-4)",
+  "allOf": [
+    {
+      "$ref": "artifact.json"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "adr"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^ADR-\\d{3,}$"
+    },
+    "status": {
+      "enum": [
+        "proposed",
+        "pending-review",
+        "accepted",
+        "rejected",
+        "deprecated",
+        "superseded",
+        "draft"
+      ]
+    },
+    "supersedes": {
+      "type": "string",
+      "pattern": "^[A-Z]{1,3}-\\d{3,}$"
+    }
+  }
+}

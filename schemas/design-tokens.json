@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "keel://schemas/design-tokens.json",
+  "title": "Design-token set (DP-3)",
+  "allOf": [
+    {
+      "$ref": "artifact.json"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "design-tokens"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^DT-\\d{3,}$"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "pending-review",
+        "approved",
+        "rejected",
+        "in-progress",
+        "done",
+        "archived"
+      ]
+    }
+  }
+}

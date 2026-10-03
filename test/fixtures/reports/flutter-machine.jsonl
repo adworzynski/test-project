@@ -1,0 +1,13 @@
+{"protocolVersion":"0.1.1","runnerVersion":"1.25.7","pid":4242,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"/app/test/habit_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading /app/test/habit_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2}
+{"count":1,"time":5,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":310}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":null,"column":null,"url":null},"type":"group","time":312}
+{"group":{"id":3,"suiteID":0,"parentID":2,"name":"habits","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":5,"column":3,"url":"file:///app/test/habit_test.dart"},"type":"group","time":313}
+{"test":{"id":4,"name":"habits saves a habit","suiteID":0,"groupIDs":[2,3],"metadata":{"skip":false,"skipReason":null},"line":7,"column":5,"url":"file:///app/test/habit_test.dart"},"type":"testStart","time":314}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":350}
+{"test":{"id":5,"name":"habits rejects empty names","suiteID":0,"groupIDs":[2,3],"metadata":{"skip":false,"skipReason":null},"line":11,"column":5,"url":"file:///app/test/habit_test.dart"},"type":"testStart","time":351}
+{"testID":5,"error":"Expected: 'Name is required'\n  Actual: null","stackTrace":"package:test_api expect","isFailure":true,"type":"error","time":360}
+{"testID":5,"result":"failure","skipped":false,"hidden":false,"type":"testDone","time":361}
+{"success":false,"type":"done","time":400}

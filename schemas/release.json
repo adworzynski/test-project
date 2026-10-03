@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "keel://schemas/release.json",
+  "title": "Release checklist (RC-1)",
+  "allOf": [
+    {
+      "$ref": "artifact.json"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "release"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^RL-\\d{3,}$"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "pending-review",
+        "approved",
+        "rejected",
+        "in-progress",
+        "done",
+        "archived"
+      ]
+    },
+    "version": {
+      "type": "string"
+    },
+    "build": {
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "mobile",
+        "web"
+      ]
+    }
+  }
+}
